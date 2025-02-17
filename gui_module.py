@@ -1,20 +1,17 @@
 #该模块负责创建图形用户界面，处理用户输入，并显示算法运行结果
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 import resource_generator
 import banker_algorithm
 import sequence_processor
 import sv_ttk
+
 
 def run_banker_algorithm():
     try:
         n = int(entry_n.get())
         m = int(entry_m.get())
         state = resource_generator.generate_resources(n, m)
-
-        # 清空资源信息显示框
-        resource_info_text.delete('1.0', tk.END)
 
         # 显示资源上限
         resource_max_text = f"资源上限: {state['resource_max']}\n"
@@ -36,9 +33,6 @@ def run_banker_algorithm():
         available_text = f"可用资源: {state['available']}\n"
         resource_info_text.insert(tk.END, available_text)
 
-        # 清空结果信息显示框
-        result_info_text.delete('1.0', tk.END)
-
         all_sequences = sequence_processor.generate_all_sequences(n)
         safe_sequences = []
         for sequence in all_sequences:
@@ -54,20 +48,27 @@ def run_banker_algorithm():
                 safe_sequences.append((sequence, utilization))
         safe_sequences.sort(key=lambda x: x[1], reverse=True)
 
-        if not safe_sequences:
-            result_info_text.insert(tk.END, "没有安全序列")
-        else:
-            result_text = "安全序列及资源利用效率：\n"
-            for sequence, utilization in safe_sequences:
-                result_text += f"序列: {sequence}, 资源利用效率: {utilization:.2f}\n"
-            result_info_text.insert(tk.END, result_text)
+        # 清空之前的结果显示
+        for i in result_table.get_children():
+            result_table.delete(i)
+
+        # 插入表头
+        result_table['columns'] = ('Sequence', 'Utilization')
+        result_table.heading('Sequence', text='序列')
+        result_table.heading('Utilization', text='资源利用效率')
+        result_table.column('Sequence', width=200)
+        result_table.column('Utilization', width=100)
+
+        # 插入数据
+        for sequence, utilization in safe_sequences:
+            result_table.insert('', tk.END, values=(sequence, f"{utilization:.2f}"))
 
     except ValueError:
         messagebox.showerror("错误", "请输入有效的整数！")
 
 
 def create_gui():
-    global entry_n, entry_m, resource_info_text, result_info_text
+    global entry_n, entry_m, resource_info_text, result_table
     root = tk.Tk()
     root.title("银行家算法模拟")
 
@@ -75,7 +76,7 @@ def create_gui():
     input_frame = ttk.Frame(root)
     input_frame.pack(pady=10)
 
-    label_n = ttk.Label(input_frame, text="客户数量 (n):")  # 使用ttk的Label
+    label_n = ttk.Label(input_frame, text="客户数量 (n):")
     label_n.pack(side=tk.LEFT, padx=5)
     entry_n = ttk.Entry(input_frame)
     entry_n.pack(side=tk.LEFT, padx=5)
@@ -93,8 +94,8 @@ def create_gui():
     resource_info_text.pack(pady=10)
 
     # 结果信息显示部分
-    result_info_text = tk.Text(root, height=15, width=50)
-    result_info_text.pack(pady=10)
+    result_table = ttk.Treeview(root, columns=('Sequence', 'Utilization'), show='headings')
+    result_table.pack(pady=10)
 
     sv_ttk.set_theme("dark")
     root.mainloop()
