@@ -12,6 +12,9 @@ def run_banker_algorithm():
         m = int(entry_m.get())
         state = resource_generator.generate_resources(n, m)
 
+        # 清空资源信息显示框
+        resource_info_text.delete('1.0', tk.END)
+
         # 显示资源上限
         resource_max_text = f"资源上限: {state['resource_max']}\n"
         resource_info_text.insert(tk.END, resource_max_text)
@@ -31,6 +34,9 @@ def run_banker_algorithm():
         # 显示可用资源
         available_text = f"可用资源: {state['available']}\n"
         resource_info_text.insert(tk.END, available_text)
+
+        # 清空结果信息显示框
+        result_info_text.delete('1.0', tk.END)
 
         all_sequences = sequence_processor.generate_all_sequences(n)
         safe_sequences = []
