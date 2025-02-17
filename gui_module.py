@@ -1,9 +1,10 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 import resource_generator
 import banker_algorithm
 import sequence_processor
-
+import sv_ttk
 
 def run_banker_algorithm():
     try:
@@ -62,20 +63,20 @@ def create_gui():
     root.title("银行家算法模拟")
 
     # 用户输入部分
-    input_frame = tk.Frame(root)
+    input_frame = ttk.Frame(root)
     input_frame.pack(pady=10)
 
-    label_n = tk.Label(input_frame, text="客户数量 (n):")
+    label_n = ttk.Label(input_frame, text="客户数量 (n):")  # 使用ttk的Label
     label_n.pack(side=tk.LEFT, padx=5)
-    entry_n = tk.Entry(input_frame)
+    entry_n = ttk.Entry(input_frame)
     entry_n.pack(side=tk.LEFT, padx=5)
 
-    label_m = tk.Label(input_frame, text="资源类型数量 (m):")
+    label_m = ttk.Label(input_frame, text="资源类型数量 (m):")
     label_m.pack(side=tk.LEFT, padx=5)
-    entry_m = tk.Entry(input_frame)
+    entry_m = ttk.Entry(input_frame)
     entry_m.pack(side=tk.LEFT, padx=5)
 
-    button_run = tk.Button(root, text="运行算法", command=run_banker_algorithm)
+    button_run = ttk.Button(root, text="运行算法", command=run_banker_algorithm)
     button_run.pack(pady=10)
 
     # 资源信息显示部分
@@ -86,4 +87,9 @@ def create_gui():
     result_info_text = tk.Text(root, height=15, width=50)
     result_info_text.pack(pady=10)
 
+    sv_ttk.set_theme("dark")
     root.mainloop()
+
+
+if __name__ == "__main__":
+    create_gui()
