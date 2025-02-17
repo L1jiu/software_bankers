@@ -1,3 +1,4 @@
+#该模块负责创建图形用户界面，处理用户输入，并显示算法运行结果
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
