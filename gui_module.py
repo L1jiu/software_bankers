@@ -9,6 +9,10 @@ import sv_ttk
 
 def run_banker_algorithm():
     try:
+        # 清空文本框内容
+        resource_info_text.delete('1.0', tk.END)
+
+
         n = int(entry_n.get())
         m = int(entry_m.get())
         state = resource_generator.generate_resources(n, m)
