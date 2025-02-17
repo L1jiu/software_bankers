@@ -53,11 +53,13 @@ def run_banker_algorithm():
                 safe_sequences.append((sequence, utilization))
         safe_sequences.sort(key=lambda x: x[1], reverse=True)
 
-        result_text = "安全序列及资源利用效率：\n"
-        for sequence, utilization in safe_sequences:
-            result_text += f"序列: {sequence}, 资源利用效率: {utilization:.2f}\n"
-
-        result_info_text.insert(tk.END, result_text)
+        if not safe_sequences:
+            result_info_text.insert(tk.END, "没有安全序列")
+        else:
+            result_text = "安全序列及资源利用效率：\n"
+            for sequence, utilization in safe_sequences:
+                result_text += f"序列: {sequence}, 资源利用效率: {utilization:.2f}\n"
+            result_info_text.insert(tk.END, result_text)
 
     except ValueError:
         messagebox.showerror("错误", "请输入有效的整数！")
