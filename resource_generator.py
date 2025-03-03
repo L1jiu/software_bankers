@@ -3,11 +3,11 @@ import random
 
 def generate_resources(n, m):
     # 随机生成资源上限
-    resource_max = [random.randint(1, 10) for _ in range(m)]
+    resource_max = [random.randint(1, 50) for _ in range(m)]
     available = resource_max.copy()
     # 随机生成已分配资源和需求资源
     allocation = [[random.randint(0, min(available[j], 10)) for j in range(m)] for i in range(n)]
-    need = [[random.randint(0, resource_max[j] - allocation[i][j]) for j in range(m)] for i in range(n)]
+    need = [[random.randint(0, min(available[j], 10)) for j in range(m)] for i in range(n)]
     for i in range(n):
         for j in range(m):
             available[j] -= allocation[i][j]
