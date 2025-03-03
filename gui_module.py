@@ -48,7 +48,6 @@ def run_banker_algorithm():
             if is_safe_flag:
                 utilization = sequence_processor.calculate_resource_utilization(state, sequence)
                 safe_sequences.append((sequence, utilization))
-        # 根据资源利用效率进行排序
         safe_sequences.sort(key=lambda x: x[1], reverse=True)
 
         # 清空之前的结果显示

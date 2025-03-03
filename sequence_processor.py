@@ -12,19 +12,45 @@ def calculate_resource_utilization(state, sequence):
     need = state['need']
     work = available.copy()
     total_allocated = [0] * m
-    # 引入资源权重，这里简单地将资源的索引加 1 作为权重
-    resource_weights = [i + 1 for i in range(m)]
-    weighted_total_allocated = 0
-    weighted_available = 0
-    for i in sequence:
+
+    # 用于记录每个进程的等待时间
+    waiting_times = [0] * n
+    # 记录总等待时间
+    total_waiting_time = 0
+
+    # 模拟资源分配过程
+    for idx, i in enumerate(sequence):
+        # 计算当前进程的等待时间
+        waiting_time = sum([max(0, need[i][j] - work[j]) for j in range(m)])
+        waiting_times[i] = waiting_time
+        total_waiting_time += waiting_time
+
         for j in range(m):
             work[j] += allocation[i][j]
             total_allocated[j] += allocation[i][j]
-            # 计算加权的已分配资源
-            weighted_total_allocated += allocation[i][j] * resource_weights[j]
-    # 计算加权的可用资源
-    for j in range(m):
-        weighted_available += available[j] * resource_weights[j]
-    # 计算加权的资源利用效率
-    utilization = weighted_total_allocated / weighted_available
+
+    # 计算平均等待时间
+    average_waiting_time = total_waiting_time / n if n > 0 else 0
+
+    # 计算资源周转率（假设每个进程的执行时间为 1 单位时间）
+    resource_turnover_rate = n / average_waiting_time if average_waiting_time != 0 else 0
+
+    # 计算资源闲置率
+    total_resource_time = sum([sum(allocation[i]) for i in range(n)])
+    total_available_time = sum([available[j] * len(sequence) for j in range(m)])
+    resource_idle_rate = (total_available_time - total_resource_time) / total_available_time if total_available_time != 0 else 0
+
+    # 归一化处理，避免分母为 0
+    normalized_waiting_time = 1 / (average_waiting_time + 1e-9) if average_waiting_time != 0 else 0
+    normalized_turnover_rate = resource_turnover_rate
+    normalized_idle_rate = 1 - resource_idle_rate
+
+    # 计算资源利用效率，考虑平均等待时间、资源周转率和闲置资源率
+    # 采用更复杂的加权求和，避免精度丢失
+    total_normalized = normalized_waiting_time + normalized_turnover_rate + normalized_idle_rate
+    if total_normalized == 0:
+        utilization = 0
+    else:
+        utilization = (normalized_waiting_time + normalized_turnover_rate + normalized_idle_rate) / 3
+
     return utilization

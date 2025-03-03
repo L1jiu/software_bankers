@@ -1,4 +1,6 @@
-#该模块实现银行家算法的核心逻辑，用于判断系统是否安全，并找出安全序列。
+# 该模块实现银行家算法的核心逻辑，用于判断系统是否安全，并找出安全序列。
+import sequence_processor
+
 def is_safe(state):
     n = state['n']
     m = state['m']
