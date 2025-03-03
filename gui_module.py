@@ -27,24 +27,42 @@ def run_banker_algorithm():
         state = resource_generator.generate_resources(n, m)
 
         # 显示资源上限
-        resource_max_table['columns'] = tuple(f"Resource {j}" for j in range(m))
+        column_names = [str(j + 1) for j in range(m)]
+        resource_max_table['columns'] = tuple(column_names)
+        # 为动态生成的列名设置表头文本
+        for col in column_names:
+            resource_max_table.heading(col, text=col)
+            resource_max_table.column(col, width=40)
         resource_max_table.heading('#0', text='资源上限')
         resource_max_table.insert('', tk.END, text='', values=state['resource_max'])
 
+
         # 显示已分配资源
-        allocation_table['columns'] = tuple(f"Resource {j}" for j in range(m))
+        allocation_table['columns'] = tuple(column_names)
+        # 为动态生成的列名设置表头文本
+        for col in column_names:
+            allocation_table.heading(col, text=col)
+            allocation_table.column(col, width=20)
         allocation_table.heading('#0', text='已分配资源')
         for i in range(n):
             allocation_table.insert('', tk.END, text=f"客户 {i}", values=state['allocation'][i])
 
         # 显示需求资源
-        need_table['columns'] = tuple(f"Resource {j}" for j in range(m))
+        need_table['columns'] = tuple(column_names)
+        # 为动态生成的列名设置表头文本
+        for col in column_names:
+            need_table.heading(col, text=col)
+            need_table.column(col, width=20)
         need_table.heading('#0', text='需求资源')
         for i in range(n):
             need_table.insert('', tk.END, text=f"客户 {i}", values=state['need'][i])
 
         # 显示可用资源
-        available_table['columns'] = tuple(f"Resource {j}" for j in range(m))
+        available_table['columns'] = tuple(column_names)
+        # 为动态生成的列名设置表头文本
+        for col in column_names:
+            available_table.heading(col, text=col)
+            available_table.column(col, width=20)
         available_table.heading('#0', text='可用资源')
         available_table.insert('', tk.END, text='', values=state['available'])
 
