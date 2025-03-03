@@ -12,31 +12,41 @@ no_safe_sequence_label = None
 def run_banker_algorithm():
     global no_safe_sequence_label
     try:
-        # 清空文本框内容
-        resource_info_text.delete('1.0', tk.END)
+        # 清空所有资源表格内容
+        for i in resource_max_table.get_children():
+            resource_max_table.delete(i)
+        for i in allocation_table.get_children():
+            allocation_table.delete(i)
+        for i in need_table.get_children():
+            need_table.delete(i)
+        for i in available_table.get_children():
+            available_table.delete(i)
+
         n = int(entry_n.get())
         m = int(entry_m.get())
         state = resource_generator.generate_resources(n, m)
 
         # 显示资源上限
-        resource_max_text = f"资源上限: {state['resource_max']}\n"
-        resource_info_text.insert(tk.END, resource_max_text)
+        resource_max_table['columns'] = tuple(f"Resource {j}" for j in range(m))
+        resource_max_table.heading('#0', text='资源上限')
+        resource_max_table.insert('', tk.END, text='', values=state['resource_max'])
 
         # 显示已分配资源
-        allocation_text = "已分配资源:\n"
+        allocation_table['columns'] = tuple(f"Resource {j}" for j in range(m))
+        allocation_table.heading('#0', text='已分配资源')
         for i in range(n):
-            allocation_text += f"客户 {i}: {state['allocation'][i]}\n"
-        resource_info_text.insert(tk.END, allocation_text)
+            allocation_table.insert('', tk.END, text=f"客户 {i}", values=state['allocation'][i])
 
         # 显示需求资源
-        need_text = "需求资源:\n"
+        need_table['columns'] = tuple(f"Resource {j}" for j in range(m))
+        need_table.heading('#0', text='需求资源')
         for i in range(n):
-            need_text += f"客户 {i}: {state['need'][i]}\n"
-        resource_info_text.insert(tk.END, need_text)
+            need_table.insert('', tk.END, text=f"客户 {i}", values=state['need'][i])
 
         # 显示可用资源
-        available_text = f"可用资源: {state['available']}\n"
-        resource_info_text.insert(tk.END, available_text)
+        available_table['columns'] = tuple(f"Resource {j}" for j in range(m))
+        available_table.heading('#0', text='可用资源')
+        available_table.insert('', tk.END, text='', values=state['available'])
 
         all_sequences = sequence_processor.generate_all_sequences(n)
         safe_sequences = []
@@ -85,33 +95,69 @@ def run_banker_algorithm():
 
 
 def create_gui():
-    global entry_n, entry_m, resource_info_text, result_table, root
+    global entry_n, entry_m, resource_max_table, allocation_table, need_table, available_table, result_table, root
     root = tk.Tk()
     root.title("银行家算法模拟")
 
-    # 用户输入部分
-    input_frame = ttk.Frame(root)
-    input_frame.pack(pady=10)
+    # 创建一个主框架
+    main_frame = ttk.Frame(root)
+    main_frame.pack(padx=10, pady=10)
+
+    # 用户输入部分，放在第一行
+    input_frame = ttk.Frame(main_frame)
+    input_frame.grid(row=0, column=0, columnspan=2, sticky='ew')
 
     label_n = ttk.Label(input_frame, text="客户数量 (n):")
-    label_n.pack(side=tk.LEFT, padx=5)
+    label_n.grid(row=0, column=0, padx=5)
     entry_n = ttk.Entry(input_frame)
-    entry_n.pack(side=tk.LEFT, padx=5)
+    entry_n.grid(row=0, column=1, padx=5)
 
     label_m = ttk.Label(input_frame, text="资源类型数量 (m):")
-    label_m.pack(side=tk.LEFT, padx=5)
+    label_m.grid(row=0, column=2, padx=5)
     entry_m = ttk.Entry(input_frame)
-    entry_m.pack(side=tk.LEFT, padx=5)
+    entry_m.grid(row=0, column=3, padx=5)
 
-    button_run = ttk.Button(root, text="运行算法", command=run_banker_algorithm)
-    button_run.pack(pady=10)
+    button_run = ttk.Button(input_frame, text="运行算法", command=run_banker_algorithm)
+    button_run.grid(row=0, column=4, padx=5)
 
-    # 资源信息显示部分
-    resource_info_text = tk.Text(root, height=15, width=50)
-    resource_info_text.pack(pady=10)
+    # 资源上限表格，放在第一行第二列
+    resource_max_frame = ttk.Frame(main_frame)
+    resource_max_frame.grid(row=1, column=1, sticky='ew')
+    resource_max_label = ttk.Label(resource_max_frame, text="资源上限表格")
+    resource_max_label.pack(pady=5)
+    resource_max_table = ttk.Treeview(resource_max_frame, show='headings')
+    resource_max_table.pack(pady=10)
 
-    # 结果信息显示部分
-    result_table = ttk.Treeview(root, columns=('Sequence', 'Utilization'), show='headings')
+    # 已分配资源表格，放在第二行第一列
+    allocation_frame = ttk.Frame(main_frame)
+    allocation_frame.grid(row=2, column=0, sticky='ew')
+    allocation_label = ttk.Label(allocation_frame, text="已分配资源表格")
+    allocation_label.pack(pady=5)
+    allocation_table = ttk.Treeview(allocation_frame, show='headings')
+    allocation_table.pack(pady=10)
+
+    # 需求资源表格，放在第二行第二列
+    need_frame = ttk.Frame(main_frame)
+    need_frame.grid(row=2, column=1, sticky='ew')
+    need_label = ttk.Label(need_frame, text="需求资源表格")
+    need_label.pack(pady=5)
+    need_table = ttk.Treeview(need_frame, show='headings')
+    need_table.pack(pady=10)
+
+    # 可用资源表格，放在第一行第一列
+    available_frame = ttk.Frame(main_frame)
+    available_frame.grid(row=1, column=0, sticky='ew')
+    available_label = ttk.Label(available_frame, text="可用资源表格")
+    available_label.pack(pady=5)
+    available_table = ttk.Treeview(available_frame, show='headings')
+    available_table.pack(pady=10)
+
+    # 结果信息显示部分，放在第三行居中
+    result_frame = ttk.Frame(main_frame)
+    result_frame.grid(row=3, column=0, columnspan=2, sticky='nsew')
+    result_label = ttk.Label(result_frame, text="结果信息表格")
+    result_label.pack(pady=5)
+    result_table = ttk.Treeview(result_frame, columns=('Sequence', 'Utilization'), show='headings')
     result_table.pack(pady=10)
 
     sv_ttk.set_theme("dark")
