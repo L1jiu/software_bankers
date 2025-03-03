@@ -6,7 +6,6 @@ import banker_algorithm
 import sequence_processor
 import sv_ttk
 
-# 新增全局变量 no_safe_sequence_label
 no_safe_sequence_label = None
 
 def run_banker_algorithm():
@@ -94,20 +93,16 @@ def run_banker_algorithm():
 
         # 判断是否有安全序列
         if not safe_sequences:
-            # 没有安全序列，显示“无安全序列”字样
             if no_safe_sequence_label is None:
                 no_safe_sequence_label = tk.Label(root, text="无安全序列")
                 no_safe_sequence_label.pack(pady=10)
             else:
                 no_safe_sequence_label.pack(pady=10)
         else:
-            # 有安全序列，隐藏“无安全序列”字样
             if no_safe_sequence_label is not None:
                 no_safe_sequence_label.pack_forget()
-            # 插入数据
             for sequence, utilization in safe_sequences:
                 result_table.insert('', tk.END, values=(sequence, f"{utilization:.2f}"))
-
     except ValueError:
         messagebox.showerror("错误", "请输入有效的整数！")
 
@@ -121,7 +116,6 @@ def create_gui():
     main_frame = ttk.Frame(root)
     main_frame.pack(padx=10, pady=10)
 
-    # 用户输入部分，放在第一行
     input_frame = ttk.Frame(main_frame)
     input_frame.grid(row=0, column=0, columnspan=2, sticky='ew')
 
@@ -138,7 +132,6 @@ def create_gui():
     button_run = ttk.Button(input_frame, text="运行算法", command=run_banker_algorithm)
     button_run.grid(row=0, column=4, padx=5)
 
-    # 资源上限表格，放在第一行第二列
     resource_max_frame = ttk.Frame(main_frame)
     resource_max_frame.grid(row=1, column=1, sticky='ew')
     resource_max_label = ttk.Label(resource_max_frame, text="资源上限表格")
@@ -146,7 +139,6 @@ def create_gui():
     resource_max_table = ttk.Treeview(resource_max_frame, show='headings')
     resource_max_table.pack(pady=10)
 
-    # 已分配资源表格，放在第二行第一列
     allocation_frame = ttk.Frame(main_frame)
     allocation_frame.grid(row=2, column=0, sticky='ew')
     allocation_label = ttk.Label(allocation_frame, text="已分配资源表格")
@@ -154,7 +146,6 @@ def create_gui():
     allocation_table = ttk.Treeview(allocation_frame, show='headings')
     allocation_table.pack(pady=10)
 
-    # 需求资源表格，放在第二行第二列
     need_frame = ttk.Frame(main_frame)
     need_frame.grid(row=2, column=1, sticky='ew')
     need_label = ttk.Label(need_frame, text="需求资源表格")
@@ -162,7 +153,6 @@ def create_gui():
     need_table = ttk.Treeview(need_frame, show='headings')
     need_table.pack(pady=10)
 
-    # 可用资源表格，放在第一行第一列
     available_frame = ttk.Frame(main_frame)
     available_frame.grid(row=1, column=0, sticky='ew')
     available_label = ttk.Label(available_frame, text="可用资源表格")
@@ -170,7 +160,6 @@ def create_gui():
     available_table = ttk.Treeview(available_frame, show='headings')
     available_table.pack(pady=10)
 
-    # 结果信息显示部分，放在第三行居中
     result_frame = ttk.Frame(main_frame)
     result_frame.grid(row=3, column=0, columnspan=2, sticky='nsew')
     result_label = ttk.Label(result_frame, text="结果信息表格")

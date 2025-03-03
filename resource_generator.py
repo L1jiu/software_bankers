@@ -19,7 +19,6 @@ def generate_resources(n, m):
         'available': available,
         'allocation': allocation,
         'need': need,
-        # 新增资源上限的正确计算结果
         'resource_max': resource_max_correct
     }
     return state
