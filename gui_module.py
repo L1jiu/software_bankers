@@ -1,4 +1,4 @@
-#该模块负责创建图形用户界面，处理用户输入，并显示算法运行结果
+# 该模块负责创建图形用户界面，处理用户输入，并显示算法运行结果
 import tkinter as tk
 from tkinter import messagebox, ttk
 import resource_generator
@@ -6,8 +6,11 @@ import banker_algorithm
 import sequence_processor
 import sv_ttk
 
+# 新增全局变量 no_safe_sequence_label
+no_safe_sequence_label = None
 
 def run_banker_algorithm():
+    global no_safe_sequence_label
     try:
         # 清空文本框内容
         resource_info_text.delete('1.0', tk.END)
@@ -61,16 +64,28 @@ def run_banker_algorithm():
         result_table.column('Sequence', width=200)
         result_table.column('Utilization', width=100)
 
-        # 插入数据
-        for sequence, utilization in safe_sequences:
-            result_table.insert('', tk.END, values=(sequence, f"{utilization:.2f}"))
+        # 判断是否有安全序列
+        if not safe_sequences:
+            # 没有安全序列，显示“无安全序列”字样
+            if no_safe_sequence_label is None:
+                no_safe_sequence_label = tk.Label(root, text="无安全序列")
+                no_safe_sequence_label.pack(pady=10)
+            else:
+                no_safe_sequence_label.pack(pady=10)
+        else:
+            # 有安全序列，隐藏“无安全序列”字样
+            if no_safe_sequence_label is not None:
+                no_safe_sequence_label.pack_forget()
+            # 插入数据
+            for sequence, utilization in safe_sequences:
+                result_table.insert('', tk.END, values=(sequence, f"{utilization:.2f}"))
 
     except ValueError:
         messagebox.showerror("错误", "请输入有效的整数！")
 
 
 def create_gui():
-    global entry_n, entry_m, resource_info_text, result_table
+    global entry_n, entry_m, resource_info_text, result_table, root
     root = tk.Tk()
     root.title("银行家算法模拟")
 
