@@ -5,6 +5,7 @@ import resource_generator
 import banker_algorithm
 import sequence_processor
 import sv_ttk
+from tkinter import font as tkfont
 
 no_safe_sequence_label = None
 
@@ -93,16 +94,25 @@ def run_banker_algorithm():
 
         # 判断是否有安全序列
         if not safe_sequences:
+            # 定义一个较大的字体
+            large_font = tkfont.Font(size=16)  # 调整这里的size值以改变字体大小
+
             if no_safe_sequence_label is None:
-                no_safe_sequence_label = tk.Label(root, text="无安全序列")
+                # 创建并显示标签，同时应用新的字体
+                no_safe_sequence_label = tk.Label(root, text="无安全序列", font=large_font)
                 no_safe_sequence_label.pack(pady=10)
             else:
+                # 如果标签已存在，仅重新显示（如果之前被隐藏）
                 no_safe_sequence_label.pack(pady=10)
         else:
             if no_safe_sequence_label is not None:
+                # 隐藏“无安全序列”标签
                 no_safe_sequence_label.pack_forget()
+
+            # 插入数据到结果表格
             for sequence, utilization in safe_sequences:
                 result_table.insert('', tk.END, values=(sequence, f"{utilization:.2f}"))
+
     except ValueError:
         messagebox.showerror("错误", "请输入有效的整数！")
 
