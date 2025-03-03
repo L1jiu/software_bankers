@@ -6,8 +6,23 @@ import banker_algorithm
 import sequence_processor
 import sv_ttk
 from tkinter import font as tkfont
+from resource_generator import generate_resources
+from sequence_processor import generate_all_sequences
+from banker_algorithm import is_safe
+from sequence_processor import calculate_resource_utilization
 
+
+# 定义全局变量
 no_safe_sequence_label = None
+entry_n = None
+entry_m = None
+resource_max_frame = None
+allocation_frame = None
+need_frame = None
+available_frame = None
+result_frame = None
+root = None
+input_frame = None  # 新增全局变量定义
 
 def run_banker_algorithm():
     global no_safe_sequence_label
@@ -24,7 +39,7 @@ def run_banker_algorithm():
 
         n = int(entry_n.get())
         m = int(entry_m.get())
-        state = resource_generator.generate_resources(n, m)
+        state = generate_resources(n, m)
 
         # 显示资源上限
         column_names = [str(j + 1) for j in range(m)]
@@ -66,10 +81,10 @@ def run_banker_algorithm():
         available_table.heading('#0', text='可用资源')
         available_table.insert('', tk.END, text='', values=state['available'])
 
-        all_sequences = sequence_processor.generate_all_sequences(n)
+        all_sequences = generate_all_sequences(n)
         safe_sequences = []
         for sequence in all_sequences:
-            is_safe_flag, _ = banker_algorithm.is_safe({
+            is_safe_flag, _ = is_safe({
                 'n': n,
                 'm': m,
                 'available': state['available'].copy(),
@@ -77,7 +92,7 @@ def run_banker_algorithm():
                 'need': state['need']
             })
             if is_safe_flag:
-                utilization = sequence_processor.calculate_resource_utilization(state, sequence)
+                utilization = calculate_resource_utilization(state, sequence)
                 safe_sequences.append((sequence, utilization))
         safe_sequences.sort(key=lambda x: x[1], reverse=True)
 
@@ -116,69 +131,123 @@ def run_banker_algorithm():
     except ValueError:
         messagebox.showerror("错误", "请输入有效的整数！")
 
-
 def create_gui():
-    global entry_n, entry_m, resource_max_table, allocation_table, need_table, available_table, result_table, root
+    global entry_n, entry_m, resource_max_table, allocation_table, need_table, available_table, result_table, root, input_frame, resource_max_frame, allocation_frame, need_frame, available_frame, result_frame
     root = tk.Tk()
     root.title("银行家算法模拟")
 
+    # 获取屏幕分辨率
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+    # 计算合适的窗口大小，例如设置为屏幕宽度和高度的80%
+    window_width = int(screen_width * 0.4)
+    window_height = int(screen_height * 0.8)
+
+    # 设置窗口初始大小
+    root.geometry(f"{window_width}x{window_height}")
+
     # 创建一个主框架
     main_frame = ttk.Frame(root)
-    main_frame.pack(padx=10, pady=10)
+    main_frame.pack(fill=tk.BOTH, expand=True)
 
     input_frame = ttk.Frame(main_frame)
-    input_frame.grid(row=0, column=0, columnspan=2, sticky='ew')
+    input_frame.place(relx=0, rely=0, relwidth=1, height=30)
 
+    # 第一列的输入框和标签
     label_n = ttk.Label(input_frame, text="客户数量 (n):")
-    label_n.grid(row=0, column=0, padx=5)
+    label_n.place(relx=0, rely=0, relwidth=0.2)
     entry_n = ttk.Entry(input_frame)
-    entry_n.grid(row=0, column=1, padx=5)
+    entry_n.place(relx=0, rely=0.5, relwidth=0.2)
 
+    # 第二列的输入框和标签
     label_m = ttk.Label(input_frame, text="资源类型数量 (m):")
-    label_m.grid(row=0, column=2, padx=5)
+    label_m.place(relx=0.2, rely=0, relwidth=0.2)
     entry_m = ttk.Entry(input_frame)
-    entry_m.grid(row=0, column=3, padx=5)
+    entry_m.place(relx=0.2, rely=0.5, relwidth=0.2)
 
     button_run = ttk.Button(input_frame, text="运行算法", command=run_banker_algorithm)
-    button_run.grid(row=0, column=4, padx=5)
+    button_run.place(relx=0.4, rely=0.5, relwidth=0.2)
 
     resource_max_frame = ttk.Frame(main_frame)
-    resource_max_frame.grid(row=1, column=1, sticky='ew')
+    resource_max_frame.place(relx=0.5, rely=0.1, relwidth=0.5, relheight=0.3)
     resource_max_label = ttk.Label(resource_max_frame, text="资源上限表格")
     resource_max_label.pack(pady=5)
     resource_max_table = ttk.Treeview(resource_max_frame, show='headings')
-    resource_max_table.pack(pady=10)
+    resource_max_table.pack(pady=10, fill=tk.BOTH, expand=True)
+
+    # 添加滚动条
+    resource_max_scrollbar = ttk.Scrollbar(resource_max_frame, orient=tk.VERTICAL, command=resource_max_table.yview)
+    resource_max_table.configure(yscrollcommand=resource_max_scrollbar.set)
+    resource_max_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     allocation_frame = ttk.Frame(main_frame)
-    allocation_frame.grid(row=2, column=0, sticky='ew')
+    allocation_frame.place(relx=0, rely=0.1, relwidth=0.5, relheight=0.3)
     allocation_label = ttk.Label(allocation_frame, text="已分配资源表格")
     allocation_label.pack(pady=5)
     allocation_table = ttk.Treeview(allocation_frame, show='headings')
-    allocation_table.pack(pady=10)
+    allocation_table.pack(pady=10, fill=tk.BOTH, expand=True)
+
+    # 添加滚动条
+    allocation_scrollbar = ttk.Scrollbar(allocation_frame, orient=tk.VERTICAL, command=allocation_table.yview)
+    allocation_table.configure(yscrollcommand=allocation_scrollbar.set)
+    allocation_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     need_frame = ttk.Frame(main_frame)
-    need_frame.grid(row=2, column=1, sticky='ew')
+    need_frame.place(relx=0.5, rely=0.4, relwidth=0.5, relheight=0.3)
     need_label = ttk.Label(need_frame, text="需求资源表格")
     need_label.pack(pady=5)
     need_table = ttk.Treeview(need_frame, show='headings')
-    need_table.pack(pady=10)
+    need_table.pack(pady=10, fill=tk.BOTH, expand=True)
+
+    # 添加滚动条
+    need_scrollbar = ttk.Scrollbar(need_frame, orient=tk.VERTICAL, command=need_table.yview)
+    need_table.configure(yscrollcommand=need_scrollbar.set)
+    need_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     available_frame = ttk.Frame(main_frame)
-    available_frame.grid(row=1, column=0, sticky='ew')
+    available_frame.place(relx=0, rely=0.4, relwidth=0.5, relheight=0.3)
     available_label = ttk.Label(available_frame, text="可用资源表格")
     available_label.pack(pady=5)
     available_table = ttk.Treeview(available_frame, show='headings')
-    available_table.pack(pady=10)
+    available_table.pack(pady=10, fill=tk.BOTH, expand=True)
+
+    # 添加滚动条
+    available_scrollbar = ttk.Scrollbar(available_frame, orient=tk.VERTICAL, command=available_table.yview)
+    available_table.configure(yscrollcommand=available_scrollbar.set)
+    available_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     result_frame = ttk.Frame(main_frame)
-    result_frame.grid(row=3, column=0, columnspan=2, sticky='nsew')
+    result_frame.place(relx=0, rely=0.7, relwidth=1, relheight=0.3)
     result_label = ttk.Label(result_frame, text="结果信息表格")
     result_label.pack(pady=5)
     result_table = ttk.Treeview(result_frame, columns=('Sequence', 'Utilization'), show='headings')
-    result_table.pack(pady=10)
+    result_table.pack(pady=10, fill=tk.BOTH, expand=True)
+
+    # 添加滚动条
+    result_scrollbar = ttk.Scrollbar(result_frame, orient=tk.VERTICAL, command=result_table.yview)
+    result_table.configure(yscrollcommand=result_scrollbar.set)
+    result_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     sv_ttk.set_theme("dark")
+
+    # 绑定窗口大小改变事件
+    root.bind("<Configure>", on_window_resize)
+
     root.mainloop()
+
+def on_window_resize(event):
+    # 重新计算并设置各个控件的位置和大小
+    width = event.width
+    height = event.height
+
+    input_frame.place(relx=0, rely=0, relwidth=1, height=70)
+
+    resource_max_frame.place(relx=0.5, rely=0.1, relwidth=0.5, relheight=0.3)
+    allocation_frame.place(relx=0, rely=0.1, relwidth=0.5, relheight=0.3)
+    need_frame.place(relx=0.5, rely=0.4, relwidth=0.5, relheight=0.3)
+    available_frame.place(relx=0, rely=0.4, relwidth=0.5, relheight=0.3)
+    result_frame.place(relx=0, rely=0.7, relwidth=1, relheight=0.3)
 
 
 if __name__ == "__main__":
