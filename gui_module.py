@@ -139,7 +139,7 @@ def create_gui():
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
 
-    # 计算合适的窗口大小，例如设置为屏幕宽度和高度的80%
+    # 计算合适的窗口大小
     window_width = int(screen_width * 0.4)
     window_height = int(screen_height * 0.8)
 

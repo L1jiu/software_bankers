@@ -1,7 +1,5 @@
 #此模块用于随机生成资源上限、已分配资源和需求资源，并计算可用资源。
 import random
-
-
 def generate_resources(n, m):
     # 初始化数据结构
     max_demand = []
