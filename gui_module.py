@@ -169,53 +169,37 @@ def create_gui():
     button_run = ttk.Button(input_frame, text="运行算法", command=run_banker_algorithm)
     button_run.place(relx=0.4, rely=0.5, relwidth=0.2)
 
+    # 资源上限表格框架
     resource_max_frame = ttk.Frame(main_frame)
-    resource_max_frame.place(relx=0.5, rely=0.1, relwidth=0.5, relheight=0.3)
+    resource_max_frame.place(relx=0, rely=0.1, relwidth=0.5, relheight=0.3)  # 修改了这里的放置位置
     resource_max_label = ttk.Label(resource_max_frame, text="资源上限表格")
     resource_max_label.pack(pady=5)
     resource_max_table = ttk.Treeview(resource_max_frame, show='headings')
     resource_max_table.pack(pady=10, fill=tk.BOTH, expand=True)
 
-    # 添加滚动条
-    resource_max_scrollbar = ttk.Scrollbar(resource_max_frame, orient=tk.VERTICAL, command=resource_max_table.yview)
-    resource_max_table.configure(yscrollcommand=resource_max_scrollbar.set)
-    resource_max_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
+    # 已分配资源表格框架
     allocation_frame = ttk.Frame(main_frame)
-    allocation_frame.place(relx=0, rely=0.1, relwidth=0.5, relheight=0.3)
+    allocation_frame.place(relx=0.5, rely=0.1, relwidth=0.5, relheight=0.3)  # 修改了这里的放置位置
     allocation_label = ttk.Label(allocation_frame, text="已分配资源表格")
     allocation_label.pack(pady=5)
     allocation_table = ttk.Treeview(allocation_frame, show='headings')
     allocation_table.pack(pady=10, fill=tk.BOTH, expand=True)
 
-    # 添加滚动条
-    allocation_scrollbar = ttk.Scrollbar(allocation_frame, orient=tk.VERTICAL, command=allocation_table.yview)
-    allocation_table.configure(yscrollcommand=allocation_scrollbar.set)
-    allocation_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
+    # 需求资源表格框架
     need_frame = ttk.Frame(main_frame)
-    need_frame.place(relx=0.5, rely=0.4, relwidth=0.5, relheight=0.3)
+    need_frame.place(relx=0, rely=0.4, relwidth=0.5, relheight=0.3)  # 修改了这里的放置位置
     need_label = ttk.Label(need_frame, text="需求资源表格")
     need_label.pack(pady=5)
     need_table = ttk.Treeview(need_frame, show='headings')
     need_table.pack(pady=10, fill=tk.BOTH, expand=True)
 
-    # 添加滚动条
-    need_scrollbar = ttk.Scrollbar(need_frame, orient=tk.VERTICAL, command=need_table.yview)
-    need_table.configure(yscrollcommand=need_scrollbar.set)
-    need_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
+    # 可用资源表格框架
     available_frame = ttk.Frame(main_frame)
-    available_frame.place(relx=0, rely=0.4, relwidth=0.5, relheight=0.3)
+    available_frame.place(relx=0.5, rely=0.4, relwidth=0.5, relheight=0.3)  # 修改了这里的放置位置
     available_label = ttk.Label(available_frame, text="可用资源表格")
     available_label.pack(pady=5)
     available_table = ttk.Treeview(available_frame, show='headings')
     available_table.pack(pady=10, fill=tk.BOTH, expand=True)
-
-    # 添加滚动条
-    available_scrollbar = ttk.Scrollbar(available_frame, orient=tk.VERTICAL, command=available_table.yview)
-    available_table.configure(yscrollcommand=available_scrollbar.set)
-    available_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     result_frame = ttk.Frame(main_frame)
     result_frame.place(relx=0, rely=0.7, relwidth=1, relheight=0.3)
@@ -223,11 +207,6 @@ def create_gui():
     result_label.pack(pady=5)
     result_table = ttk.Treeview(result_frame, columns=('Sequence', 'Utilization'), show='headings')
     result_table.pack(pady=10, fill=tk.BOTH, expand=True)
-
-    # 添加滚动条
-    result_scrollbar = ttk.Scrollbar(result_frame, orient=tk.VERTICAL, command=result_table.yview)
-    result_table.configure(yscrollcommand=result_scrollbar.set)
-    result_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     sv_ttk.set_theme("dark")
 
