@@ -14,3 +14,9 @@
 
 新增超时处理，用户输入较大较难计算数据时，计算时间超过10秒就会自动中断程序。
 
+## 打包
+利用pyinstaller打包
+
+```csharp
+pyinstaller --onefile --windowed --icon="software_bankers/bk.ico" --name="银行家算法模拟ver1.2 -by L1jiu" software_bankers/main.py
+```
