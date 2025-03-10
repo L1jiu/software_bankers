@@ -1,4 +1,3 @@
-# 该模块负责创建图形用户界面，处理用户输入，并显示算法运行结果
 import tkinter as tk
 from tkinter import messagebox, ttk
 import sv_ttk
@@ -7,7 +6,7 @@ from resource_generator import generate_resources
 from sequence_processor import generate_all_sequences
 from banker_algorithm import is_safe
 from sequence_processor import calculate_resource_utilization
-
+import threading
 
 # 定义全局变量
 no_safe_sequence_label = None
@@ -22,10 +21,35 @@ root = None
 input_frame = None  # 新增全局变量定义
 combo_n = None
 combo_m = None
+resource_max_table = None
+allocation_table = None
+need_table = None
+available_table = None
+result_table = None
+calculation_thread = None
+timeout_flag = False
 
 def run_banker_algorithm():
-    global no_safe_sequence_label
+    global no_safe_sequence_label, calculation_thread, timeout_flag
+    timeout_flag = False
     try:
+        # 获取下拉框的值
+        n_str = combo_n.get()
+        m_str = combo_m.get()
+
+        # 检查输入是否为有效的整数
+        if not n_str.isdigit() or not m_str.isdigit():
+            messagebox.showerror("错误", "请选择有效的正整数！")
+            return
+
+        n = int(n_str)
+        m = int(m_str)
+
+        # 检查输入是否为正数
+        if n <= 0 or m <= 0:
+            messagebox.showerror("错误", "客户数量和资源类型数量必须为正整数！")
+            return
+
         # 清空所有资源表格内容
         for i in resource_max_table.get_children():
             resource_max_table.delete(i)
@@ -36,8 +60,6 @@ def run_banker_algorithm():
         for i in available_table.get_children():
             available_table.delete(i)
 
-        n = int(combo_n.get())
-        m = int(combo_m.get())
         state = generate_resources(n, m)
 
         # 显示资源上限
@@ -49,7 +71,6 @@ def run_banker_algorithm():
             resource_max_table.column(col, width=40)
         resource_max_table.heading('#0', text='资源上限')
         resource_max_table.insert('', tk.END, text='', values=state['resource_max'])
-
 
         # 显示已分配资源
         allocation_table['columns'] = tuple(column_names)
@@ -80,55 +101,76 @@ def run_banker_algorithm():
         available_table.heading('#0', text='可用资源')
         available_table.insert('', tk.END, text='', values=state['available'])
 
-        all_sequences = generate_all_sequences(n)
-        safe_sequences = []
-        for sequence in all_sequences:
-            is_safe_flag, _ = is_safe({
-                'n': n,
-                'm': m,
-                'available': state['available'].copy(),
-                'allocation': state['allocation'],
-                'need': state['need']
-            })
-            if is_safe_flag:
-                utilization = calculate_resource_utilization(state, sequence)
-                safe_sequences.append((sequence, utilization))
-        safe_sequences.sort(key=lambda x: x[1], reverse=True)
+        # 启动计算线程
+        calculation_thread = threading.Thread(target=calculate_safe_sequences, args=(n, m, state))
+        calculation_thread.start()
 
-        # 清空之前的结果显示
-        for i in result_table.get_children():
-            result_table.delete(i)
-
-        # 插入表头
-        result_table['columns'] = ('Sequence', 'Utilization')
-        result_table.heading('Sequence', text='序列')
-        result_table.heading('Utilization', text='资源利用效率')
-        result_table.column('Sequence', width=200)
-        result_table.column('Utilization', width=100)
-
-        # 判断是否有安全序列
-        if not safe_sequences:
-            # 定义一个较大的字体
-            large_font = tkfont.Font(size=16)  # 调整这里的size值以改变字体大小
-
-            if no_safe_sequence_label is None:
-                # 创建并显示标签，同时应用新的字体
-                no_safe_sequence_label = tk.Label(root, text="无安全序列", font=large_font)
-                no_safe_sequence_label.pack(pady=10)
-            else:
-                # 如果标签已存在，仅重新显示（如果之前被隐藏）
-                no_safe_sequence_label.pack(pady=10)
-        else:
-            if no_safe_sequence_label is not None:
-                # 隐藏“无安全序列”标签
-                no_safe_sequence_label.pack_forget()
-
-            # 插入数据到结果表格
-            for sequence, utilization in safe_sequences:
-                result_table.insert('', tk.END, values=(sequence, f"{utilization:.2f}"))
+        # 设置超时检查
+        root.after(10000, check_timeout)
 
     except ValueError:
         messagebox.showerror("错误", "请选择有效的整数！")
+
+def calculate_safe_sequences(n, m, state):
+    global timeout_flag
+    all_sequences = generate_all_sequences(n)
+    safe_sequences = []
+    for sequence in all_sequences:
+        if timeout_flag:
+            return
+        is_safe_flag, _ = is_safe({
+            'n': n,
+            'm': m,
+            'available': state['available'].copy(),
+            'allocation': state['allocation'],
+            'need': state['need']
+        })
+        if is_safe_flag:
+            utilization = calculate_resource_utilization(state, sequence)
+            safe_sequences.append((sequence, utilization))
+    safe_sequences.sort(key=lambda x: x[1], reverse=True)
+
+    root.after(0, show_results, safe_sequences)
+
+def show_results(safe_sequences):
+    global no_safe_sequence_label
+    # 清空之前的结果显示
+    for i in result_table.get_children():
+        result_table.delete(i)
+
+    # 插入表头
+    result_table['columns'] = ('Sequence', 'Utilization')
+    result_table.heading('Sequence', text='序列')
+    result_table.heading('Utilization', text='资源利用效率')
+    result_table.column('Sequence', width=200)
+    result_table.column('Utilization', width=100)
+
+    # 判断是否有安全序列
+    if not safe_sequences:
+        # 定义一个较大的字体
+        large_font = tkfont.Font(size=16)  # 调整这里的size值以改变字体大小
+
+        if no_safe_sequence_label is None:
+            # 创建并显示标签，同时应用新的字体
+            no_safe_sequence_label = tk.Label(root, text="无安全序列", font=large_font)
+            no_safe_sequence_label.pack(pady=10)
+        else:
+            # 如果标签已存在，仅重新显示（如果之前被隐藏）
+            no_safe_sequence_label.pack(pady=10)
+    else:
+        if no_safe_sequence_label is not None:
+            # 隐藏“无安全序列”标签
+            no_safe_sequence_label.pack_forget()
+
+        # 插入数据到结果表格
+        for sequence, utilization in safe_sequences:
+            result_table.insert('', tk.END, values=(sequence, f"{utilization:.2f}"))
+
+def check_timeout():
+    global timeout_flag, calculation_thread
+    if calculation_thread.is_alive():
+        timeout_flag = True
+        messagebox.showerror("超时错误", "计算时间超过10秒，已自动中断！")
 
 def create_gui():
     global entry_n, entry_m, resource_max_table, allocation_table, need_table, available_table, result_table, root, input_frame, resource_max_frame, allocation_frame, need_frame, available_frame, result_frame, combo_n, combo_m
@@ -228,7 +270,6 @@ def on_window_resize(event):
     need_frame.place(relx=0.5, rely=0.4, relwidth=0.5, relheight=0.3)
     available_frame.place(relx=0, rely=0.4, relwidth=0.5, relheight=0.3)
     result_frame.place(relx=0, rely=0.7, relwidth=1, relheight=0.3)
-
 
 if __name__ == "__main__":
     create_gui()
