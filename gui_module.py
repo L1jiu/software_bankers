@@ -1,9 +1,6 @@
 # 该模块负责创建图形用户界面，处理用户输入，并显示算法运行结果
 import tkinter as tk
 from tkinter import messagebox, ttk
-import resource_generator
-import banker_algorithm
-import sequence_processor
 import sv_ttk
 from tkinter import font as tkfont
 from resource_generator import generate_resources
@@ -23,6 +20,8 @@ available_frame = None
 result_frame = None
 root = None
 input_frame = None  # 新增全局变量定义
+combo_n = None
+combo_m = None
 
 def run_banker_algorithm():
     global no_safe_sequence_label
@@ -37,8 +36,8 @@ def run_banker_algorithm():
         for i in available_table.get_children():
             available_table.delete(i)
 
-        n = int(entry_n.get())
-        m = int(entry_m.get())
+        n = int(combo_n.get())
+        m = int(combo_m.get())
         state = generate_resources(n, m)
 
         # 显示资源上限
@@ -129,10 +128,10 @@ def run_banker_algorithm():
                 result_table.insert('', tk.END, values=(sequence, f"{utilization:.2f}"))
 
     except ValueError:
-        messagebox.showerror("错误", "请输入有效的整数！")
+        messagebox.showerror("错误", "请选择有效的整数！")
 
 def create_gui():
-    global entry_n, entry_m, resource_max_table, allocation_table, need_table, available_table, result_table, root, input_frame, resource_max_frame, allocation_frame, need_frame, available_frame, result_frame
+    global entry_n, entry_m, resource_max_table, allocation_table, need_table, available_table, result_table, root, input_frame, resource_max_frame, allocation_frame, need_frame, available_frame, result_frame, combo_n, combo_m
     root = tk.Tk()
     root.title("银行家算法模拟")
 
@@ -154,17 +153,19 @@ def create_gui():
     input_frame = ttk.Frame(main_frame)
     input_frame.place(relx=0, rely=0, relwidth=1, height=30)
 
-    # 第一列的输入框和标签
+    # 第一列的下拉框和标签
     label_n = ttk.Label(input_frame, text="客户数量 (n):")
     label_n.place(relx=0, rely=0, relwidth=0.2)
-    entry_n = ttk.Entry(input_frame)
-    entry_n.place(relx=0, rely=0.5, relwidth=0.2)
+    combo_n = ttk.Combobox(input_frame, values=list(range(1, 21)))
+    combo_n.set(1)
+    combo_n.place(relx=0, rely=0.5, relwidth=0.2)
 
-    # 第二列的输入框和标签
+    # 第二列的下拉框和标签
     label_m = ttk.Label(input_frame, text="资源类型数量 (m):")
     label_m.place(relx=0.2, rely=0, relwidth=0.2)
-    entry_m = ttk.Entry(input_frame)
-    entry_m.place(relx=0.2, rely=0.5, relwidth=0.2)
+    combo_m = ttk.Combobox(input_frame, values=list(range(1, 21)))
+    combo_m.set(1)
+    combo_m.place(relx=0.2, rely=0.5, relwidth=0.2)
 
     button_run = ttk.Button(input_frame, text="运行算法", command=run_banker_algorithm)
     button_run.place(relx=0.4, rely=0.5, relwidth=0.2)
